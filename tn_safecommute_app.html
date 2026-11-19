@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SafeCommute — Tamil Nadu & Pondicherry Safe Route Finder</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { margin: 0; display: flex; height: 100vh; background: #0f1115; }
+  #map { flex: 1; height: 100%; }
+  #map.offline-map { background: #dbeafe; }
+  #map.offline-map svg { display: block; width: 100%; height: 100%; }
+  #mapPlaceholder { display: block; width: 100%; height: 100%; background: #dbeafe; }
+  #mapPlaceholder text { font-family: 'Segoe UI', Arial, sans-serif; }
+  #panel {
+    width: 380px; background: #161a22; color: #e6e9ef; padding: 18px;
+    overflow-y: auto; border-left: 1px solid #262b36;
+  }
+  h2 { margin: 0 0 2px; font-size: 18px; color: #4ade80; }
+  .sub { color: #8b93a7; font-size: 12px; margin-bottom: 16px; }
+  label { font-size: 12px; color: #8b93a7; display:block; margin: 10px 0 4px; }
+  select, input {
+    width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #2a3040;
+    background: #1e232e; color: #e6e9ef; font-size: 14px;
+  }
+  button {
+    width: 100%; padding: 10px; border: none; border-radius: 8px; background: #4ade80;
+    color: #0f1115; font-weight: 700; cursor: pointer; font-size: 14px; margin-top: 12px;
+  }
+  button:hover { background: #3fce70; }
+  button:disabled { background: #333; color: #888; cursor: not-allowed; }
+  button.secondary { background: #333; color: #e6e9ef; margin-top: 6px; }
+  .card {
+    background: #1e232e; border-radius: 10px; padding: 12px 14px; margin-top: 16px;
+    border: 1px solid #262b36;
+  }
+  .card .label { font-size: 11px; color: #8b93a7; text-transform: uppercase; letter-spacing: .05em; }
+  .card .value { font-size: 22px; font-weight: 700; margin-top: 2px; }
+  .safe { color: #4ade80; } .moderate { color: #fbbf24; } .risky { color: #f87171; }
+  #status-badge {
+    display:inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    margin-bottom: 6px;
+  }
+  #feed { max-height: 180px; overflow-y: auto; margin-top: 6px; }
+  #feed .item {
+    font-size: 12px; padding: 8px; border-radius: 6px; background: #262b36; margin-bottom: 6px;
+    border-left: 3px solid #4ade80;
+  }
+  #feed .item.warn { border-left-color: #f87171; }
+  .row { display:flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
+  .row span:first-child { color: #8b93a7; }
+  .legend-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
+  .note { font-size: 11px; color: #6b7284; margin-top: 14px; line-height: 1.5; border-top: 1px solid #262b36; padding-top: 10px; }
+  #err { color: #f87171; font-size: 12px; margin-top: 8px; display: none; }
+  .women-mode {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-top: 12px; padding: 10px 12px; border: 1px solid #9d174d;
+    border-radius: 9px; background: #321525;
+  }
+  .women-mode label { margin: 0; color: #fbcfe8; font-weight: 700; }
+  .women-mode input { width: auto; accent-color: #ec4899; transform: scale(1.2); }
+  #womenModeState { font-size: 11px; color: #f9a8d4; white-space: nowrap; }
+  .safety-alert {
+    display: none; margin-top: 12px; padding: 11px 12px; border-radius: 9px;
+    border-left: 4px solid #fbbf24; background: #332b16; color: #fef3c7;
+    font-size: 12px; line-height: 1.45;
+  }
+  .safety-alert.danger { border-left-color: #f87171; background: #351a20; color: #fee2e2; }
+  .safety-alert.good { border-left-color: #4ade80; background: #163322; color: #dcfce7; }
+  .safety-alert strong { display: block; margin-bottom: 3px; font-size: 13px; }
+  .sos-button { background: #dc2626; color: white; font-size: 15px; letter-spacing: .01em; }
+  .sos-button:hover { background: #b91c1c; }
+  .quick-help { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+  .quick-help a { display: block; padding: 8px 4px; border-radius: 7px; background: #262b36; color: #e6e9ef;
+    text-align: center; text-decoration: none; font-size: 11px; font-weight: 700; }
+  .quick-help a:hover { background: #333b4c; }
+  .sos-countdown, .sos-result { margin-top: 10px; padding: 10px; border-radius: 8px; background: #3a1820;
+    border: 1px solid #ef4444; color: #fee2e2; font-size: 12px; line-height: 1.45; }
+  .sos-countdown strong { font-size: 22px; color: #fca5a5; }
+  .sos-result { background: #172c22; border-color: #4ade80; color: #dcfce7; }
+  .sos-result .secondary { width: auto; margin: 8px 4px 0 0; padding: 7px 10px; }
+  .sos-result .inline-link { display: inline-block; color: #86efac; margin-top: 8px; font-size: 12px; }
+  .sms-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .sms-links a { color: #bfdbfe; background: #26354d; border-radius: 6px; padding: 6px 8px; font-size: 11px; text-decoration: none; }
+  .sms-links a:hover { background: #354765; }
+  .delivery-note { margin-top: 7px; color: #bbf7d0; font-size: 11px; }
+  .live-status { margin-top: 8px; padding: 8px; border-radius: 7px; background: #172235; color: #bfdbfe; font-size: 11px; line-height: 1.4; }
+  .location-tools { margin: 12px 0 4px; padding: 10px 12px; border: 1px solid #1d4ed8; border-radius: 9px; background: #172235; }
+  .location-tools .label { color: #bfdbfe; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+  .location-state { margin-top: 8px; color: #bfdbfe; font-size: 11px; line-height: 1.4; }
+  .place-hint { margin: 8px 0 2px; color: #8b93a7; font-size: 11px; }
+  .women-card { display: block; }
+  .compact-label { margin-top: 8px; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<div id="map">
+  <!-- Always-visible first paint: this remains visible even if external map assets fail. -->
+  <svg id="mapPlaceholder" viewBox="0 0 900 700" role="img" aria-label="Tamil Nadu route map preview">
+    <rect width="900" height="700" fill="#dbeafe"/>
+    <path d="M245 72 L410 65 L565 120 L690 225 L705 370 L650 510 L515 635 L365 604 L260 492 L220 350 Z" fill="#f8fafc" stroke="#94a3b8" stroke-width="3"/>
+    <path d="M265 170 L405 255 L520 345 L625 470" fill="none" stroke="#60a5fa" stroke-width="7" stroke-linecap="round" opacity=".75"/>
+    <path d="M400 80 L405 255 L365 420 L365 604" fill="none" stroke="#60a5fa" stroke-width="7" stroke-linecap="round" opacity=".75"/>
+    <path d="M220 350 L365 420 L515 635" fill="none" stroke="#60a5fa" stroke-width="7" stroke-linecap="round" opacity=".75"/>
+    <path d="M245 72 L410 65 L565 120 L690 225 L705 370 L650 510 L515 635 L365 604 L260 492 L220 350 Z" fill="none" stroke="#64748b" stroke-width="2"/>
+    <text x="42" y="48" fill="#1e3a8a" font-size="25" font-weight="700">SafeCommute — Tamil Nadu</text>
+    <text x="44" y="76" fill="#475569" font-size="15">Map preview • choose From and To to draw a safest route</text>
+    <text x="690" y="665" fill="#64748b" font-size="13" text-anchor="end">Real coordinate route network</text>
+    <g fill="#2563eb" stroke="#fff" stroke-width="2">
+      <circle cx="672" cy="122" r="7"/><circle cx="590" cy="168" r="7"/><circle cx="478" cy="165" r="7"/>
+      <circle cx="405" cy="255" r="8"/><circle cx="500" cy="292" r="7"/><circle cx="610" cy="292" r="7"/>
+      <circle cx="355" cy="350" r="7"/><circle cx="430" cy="432" r="7"/><circle cx="520" cy="450" r="7"/>
+      <circle cx="365" cy="540" r="7"/><circle cx="270" cy="612" r="7"/>
+    </g>
+    <g fill="#1e293b" font-size="13">
+      <text x="684" y="117">Chennai</text><text x="602" y="164">Kanchipuram</text><text x="490" y="161">Vellore</text>
+      <text x="418" y="250" font-weight="700">Gingee</text><text x="512" y="288">Villupuram</text><text x="620" y="288">Pondicherry</text>
+      <text x="365" y="346">Salem</text><text x="440" y="428">Trichy</text><text x="530" y="446">Thanjavur</text>
+      <text x="375" y="536">Madurai</text><text x="280" y="608">Tirunelveli</text>
+    </g>
+    <g transform="translate(52 620)"><circle cx="0" cy="0" r="7" fill="#2563eb" stroke="#fff" stroke-width="2"/><text x="15" y="5" fill="#475569" font-size="13">Available town / city</text></g>
+  </svg>
+</div>
+<div id="panel">
+  <h2>🛡 SafeCommute — Tamil Nadu & Pondicherry</h2>
+  <div class="sub">Choose any From and To place in Tamil Nadu or Pondicherry, then view the safest route.</div>
+  <div id="placeHint" class="place-hint">Loading available places…</div>
+
+  <label>From — starting place</label>
+  <select id="startSel"></select>
+  <label>To — destination</label>
+  <select id="endSel"></select>
+  <label>Time of travel</label>
+  <select id="timeSel">
+    <option>Morning</option>
+    <option>Afternoon</option>
+    <option selected>Evening</option>
+    <option>Night</option>
+    <option value="Any time">Any time (most cautious)</option>
+  </select>
+  <div class="women-mode">
+    <label for="womenMode">🛡 Women Safety Mode</label>
+    <input id="womenMode" type="checkbox" checked aria-label="Enable Women Safety Mode">
+    <span id="womenModeState">ON</span>
+  </div>
+  <button id="findBtn">🔍 Find Safest Route</button>
+  <div id="err"></div>
+
+  <div id="safetyAlert" class="safety-alert" role="status" aria-live="assertive">
+    <strong id="safetyAlertTitle">Safety alert</strong>
+    <span id="safetyAlertBody"></span>
+  </div>
+
+  <div class="card women-card">
+    <div class="label">Women's Safety SMS Alert</div>
+    <button id="sosBtn" class="sos-button">📩 Send SMS Safety Alert</button>
+    <label class="compact-label" for="sosName">Your name</label>
+    <input id="sosName" type="text" placeholder="Optional">
+    <label class="compact-label" for="safetyContact">Trusted contact mobile number</label>
+    <input id="safetyContact" type="tel" inputmode="tel" autocomplete="tel" placeholder="+919876543210">
+    <div class="compact-label">Enter one trusted number in international format. High-risk route or live safety alerts send an SMS only; no calls are placed.</div>
+    <div id="sosCountdown" class="sos-countdown" style="display:none;">
+      SMS safety alert starts in <strong id="sosSeconds">5</strong> seconds. Cancel if this was accidental.
+      <button id="cancelSosBtn" class="secondary">Cancel SMS alert</button>
+    </div>
+    <div id="sosResult" class="sos-result" style="display:none;">
+      <strong>✅ SMS safety alert prepared</strong>
+      <div id="sosLocation"></div>
+      <a id="locationMapLink" class="inline-link" href="#" target="_blank" rel="noopener">📍 Open captured location on map</a>
+      <div id="smsLinks" class="sms-links"></div>
+      <div id="deliveryNote" class="delivery-note"></div>
+      <button id="sendSmsBtn" class="secondary">📩 Open SMS alert</button>
+      <button id="copyAlertBtn" class="secondary">Copy alert message</button>
+    </div>
+  </div>
+
+  <div id="resultCard" style="display:none;">
+    <div class="card">
+      <div id="status-badge" class="safe">● ROUTE FOUND</div>
+      <div class="row"><span>Path</span><span id="res-path" style="text-align:right;max-width:220px;">-</span></div>
+      <div class="row"><span>Distance</span><span id="res-dist">-</span></div>
+      <div class="row"><span><b>Risk rate</b></span><span id="res-risk" class="value" style="font-size:16px;">-</span></div>
+      <div class="row"><span>Avg safety score</span><span id="res-score">-</span></div>
+      <div class="row"><span>Weakest leg</span><span id="res-weak">-</span></div>
+      <div class="row"><span>Women-mode reason</span><span id="res-reason" style="text-align:right;max-width:220px;">-</span></div>
+    </div>
+    <div class="card" id="compareCard" style="display:none;">
+      <div class="label">vs. Shortest Route</div>
+      <div class="row"><span><span class="legend-dot" style="background:#f87171"></span>Shortest</span><span id="res-short">-</span></div>
+    </div>
+    <button id="startSimBtn">▶ Start Live Simulation</button>
+    <button id="startLiveBtn">📡 Start Realtime Tracking</button>
+    <button id="stopLiveBtn" class="secondary" disabled>Stop Realtime Tracking</button>
+    <div id="liveStatus" class="live-status">Location tracking is off. Tap “Track My Location” and allow GPS access. Backend connection is optional for showing your position on this map.</div>
+    <button id="resetSimBtn" class="secondary">Reset</button>
+    <div class="card">
+      <div class="label">Realtime Feed <span style="float:right;color:#4ade80;">● live</span></div>
+      <div id="feed"></div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Honest note:</b> this covers Tamil Nadu cities/towns plus Pondicherry, connected by a
+    simplified real highway skeleton (real coordinates, real road categories), with
+    road risk estimated by the trained ML model rather than live accident/traffic feeds
+    (no internet access to government road-safety data or Google Maps from this environment).
+    Women Safety Mode and SMS alerts are decision-support/demo features; alerts include a
+    location message and SMS-app fallback. Automatic SMS delivery needs a secure backend
+    service with Twilio configured. SafeCommute does not place calls.
+    Device GPS tracking is real when the app is opened on localhost or HTTPS and location permission is granted;
+    GPS routes use the nearest town in this local safety network as the routing anchor.
+  </div>
+</div>
+
+<script>
+const NETWORK = {
+ "time_of_day": "Evening",
+ "nodes": {
+  "Tiruvannamalai": {
+   "lat": 12.2253,
+   "lon": 79.0747
+  },
+  "Polur": {
+   "lat": 12.5117,
+   "lon": 79.1261
+  },
+  "Chengam": {
+   "lat": 12.3,
+   "lon": 78.8
+  },
+  "Arni": {
+   "lat": 12.6706,
+   "lon": 79.2845
+  },
+  "Chetpet": {
+   "lat": 12.4644,
+   "lon": 79.3475
+  },
+  "Vandavasi": {
+   "lat": 12.5,
+   "lon": 79.62
+  },
+  "Thandarampattu": {
+   "lat": 12.154,
+   "lon": 78.947
+  },
+  "Vettavalam": {
+   "lat": 12.1,
+   "lon": 79.25
+  },
+  "Jamunamarathur": {
+   "lat": 12.5973,
+   "lon": 78.8878
+  },
+  "Gingee": {
+   "lat": 12.252,
+   "lon": 79.417
+  },
+  "Tindivanam": {
+   "lat": 12.234,
+   "lon": 79.655
+  },
+  "Melmalayanur": {
+   "lat": 12.266,
+   "lon": 79.05
+  },
+  "Tirukkoyilur": {
+   "lat": 11.966,
+   "lon": 79.202
+  },
+  "Kallakurichi": {
+   "lat": 11.74,
+   "lon": 78.959
+  },
+  "Ulundurpet": {
+   "lat": 11.698,
+   "lon": 79.288
+  },
+  "Chidambaram": {
+   "lat": 11.399,
+   "lon": 79.691
+  },
+  "Mayiladuthurai": {
+   "lat": 11.101,
+   "lon": 79.652
+  },
+  "Perambalur": {
+   "lat": 11.234,
+   "lon": 78.88
+  },
+  "Palani": {
+   "lat": 10.45,
+   "lon": 77.52
+  },
+  "Aruppukkottai": {
+   "lat": 9.51,
+   "lon": 78.095
+  },
+  "Paramakudi": {
+   "lat": 9.547,
+   "lon": 78.59
+  },
+  "Chennai": {
+   "lat": 13.0827,
+   "lon": 80.2707
+  },
+  "Kanchipuram": {
+   "lat": 12.8342,
+   "lon": 79.7036
+  },
+  "Vellore": {
+   "lat": 12.9165,
+   "lon": 79.1325
+  },
+  "Krishnagiri": {
+   "lat": 12.5186,
+   "lon": 78.2137
+  },
+  "Hosur": {
+   "lat": 12.7409,
+   "lon": 77.8253
+  },
+  "Salem": {
+   "lat": 11.6643,
+   "lon": 78.146
+  },
+  "Namakkal": {
+   "lat": 11.2189,
+   "lon": 78.1677
+  },
+  "Erode": {
+   "lat": 11.341,
+   "lon": 77.7172
+  },
+  "Tiruppur": {
+   "lat": 11.1085,
+   "lon": 77.3411
+  },
+  "Coimbatore": {
+   "lat": 11.0168,
+   "lon": 76.9558
+  },
+  "Pollachi": {
+   "lat": 10.66,
+   "lon": 77.008
+  },
+  "Udhagamandalam (Ooty)": {
+   "lat": 11.4102,
+   "lon": 76.695
+  },
+  "Karur": {
+   "lat": 10.9601,
+   "lon": 78.0766
+  },
+  "Tiruchirappalli (Trichy)": {
+   "lat": 10.7905,
+   "lon": 78.7047
+  },
+  "Thanjavur": {
+   "lat": 10.787,
+   "lon": 79.1378
+  },
+  "Kumbakonam": {
+   "lat": 10.9601,
+   "lon": 79.3788
+  },
+  "Nagapattinam": {
+   "lat": 10.7672,
+   "lon": 79.8449
+  },
+  "Pudukkottai": {
+   "lat": 10.3833,
+   "lon": 78.8
+  },
+  "Sivaganga": {
+   "lat": 9.8433,
+   "lon": 78.4809
+  },
+  "Madurai": {
+   "lat": 9.9252,
+   "lon": 78.1198
+  },
+  "Dindigul": {
+   "lat": 10.3624,
+   "lon": 77.9695
+  },
+  "Theni": {
+   "lat": 10.0104,
+   "lon": 77.4768
+  },
+  "Virudhunagar": {
+   "lat": 9.568,
+   "lon": 77.9624
+  },
+  "Sivakasi": {
+   "lat": 9.4491,
+   "lon": 77.7972
+  },
+  "Rajapalayam": {
+   "lat": 9.452,
+   "lon": 77.557
+  },
+  "Ramanathapuram": {
+   "lat": 9.3639,
+   "lon": 78.8395
+  },
+  "Tirunelveli": {
+   "lat": 8.7139,
+   "lon": 77.7567
+  },
+  "Thoothukudi": {
+   "lat": 8.7642,
+   "lon": 78.1348
+  },
+  "Nagercoil": {
+   "lat": 8.179,
+   "lon": 77.4338
+  },
+  "Villupuram": {
+   "lat": 11.9401,
+   "lon": 79.4861
+  },
+  "Cuddalore": {
+   "lat": 11.748,
+   "lon": 79.7714
+  },
+  "Pondicherry": {
+   "lat": 11.9139,
+   "lon": 79.8145
+  }
+ },
+ "edges": [
+  {
+   "from": "Tiruvannamalai",
+   "to": "Polur",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 40.4,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Tiruvannamalai",
+   "to": "Chengam",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 38.7,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Tiruvannamalai",
+   "to": "Vettavalam",
+   "safety": 89.5,
+   "risk": 10.5,
+   "distance": 29.5,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tiruvannamalai",
+   "to": "Thandarampattu",
+   "safety": 86.4,
+   "risk": 13.6,
+   "distance": 20.0,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Tiruvannamalai",
+   "to": "Arni",
+   "safety": 55.7,
+   "risk": 44.3,
+   "distance": 68.1,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Polur",
+   "to": "Chengam",
+   "safety": 27.8,
+   "risk": 72.2,
+   "distance": 53.2,
+   "road_type": "Isolated Lane",
+   "lighting": "Poor"
+  },
+  {
+   "from": "Polur",
+   "to": "Jamunamarathur",
+   "safety": 22.7,
+   "risk": 77.3,
+   "distance": 34.4,
+   "road_type": "Isolated Lane",
+   "lighting": "Poor"
+  },
+  {
+   "from": "Polur",
+   "to": "Chetpet",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 30.8,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Arni",
+   "to": "Chetpet",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 29.9,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Arni",
+   "to": "Vandavasi",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 51.3,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Thandarampattu",
+   "to": "Vettavalam",
+   "safety": 47.6,
+   "risk": 52.4,
+   "distance": 41.9,
+   "road_type": "Residential",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Chengam",
+   "to": "Jamunamarathur",
+   "safety": 27.8,
+   "risk": 72.2,
+   "distance": 43.0,
+   "road_type": "Isolated Lane",
+   "lighting": "Poor"
+  },
+  {
+   "from": "Tiruvannamalai",
+   "to": "Villupuram",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 68.5,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Gingee",
+   "to": "Villupuram",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 44.4,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Gingee",
+   "to": "Tindivanam",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 32.4,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Gingee",
+   "to": "Melmalayanur",
+   "safety": 54.3,
+   "risk": 45.7,
+   "distance": 49.9,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Gingee",
+   "to": "Tirukkoyilur",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 49.3,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Tirukkoyilur",
+   "to": "Kallakurichi",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 45.6,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Kallakurichi",
+   "to": "Ulundurpet",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 45.2,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Ulundurpet",
+   "to": "Villupuram",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 43.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tindivanam",
+   "to": "Pondicherry",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 49.5,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Vandavasi",
+   "to": "Kanchipuram",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 47.8,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Arni",
+   "to": "Vellore",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 39.9,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Chennai",
+   "to": "Kanchipuram",
+   "safety": 43.8,
+   "risk": 56.2,
+   "distance": 84.2,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Kanchipuram",
+   "to": "Vellore",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 78.2,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Vellore",
+   "to": "Krishnagiri",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 136.3,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Krishnagiri",
+   "to": "Hosur",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 61.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Krishnagiri",
+   "to": "Salem",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 119.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Salem",
+   "to": "Namakkal",
+   "safety": 71.6,
+   "risk": 28.4,
+   "distance": 62.0,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Namakkal",
+   "to": "Karur",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 38.1,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Salem",
+   "to": "Erode",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 73.7,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Erode",
+   "to": "Tiruppur",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 60.6,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tiruppur",
+   "to": "Coimbatore",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 54.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Coimbatore",
+   "to": "Pollachi",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 50.1,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Coimbatore",
+   "to": "Udhagamandalam (Ooty)",
+   "safety": 21.7,
+   "risk": 78.3,
+   "distance": 65.2,
+   "road_type": "Isolated Lane",
+   "lighting": "Poor"
+  },
+  {
+   "from": "Karur",
+   "to": "Tiruchirappalli (Trichy)",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 88.9,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tiruchirappalli (Trichy)",
+   "to": "Thanjavur",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 59.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Thanjavur",
+   "to": "Kumbakonam",
+   "safety": 89.4,
+   "risk": 10.6,
+   "distance": 40.8,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Kumbakonam",
+   "to": "Nagapattinam",
+   "safety": 54.3,
+   "risk": 45.7,
+   "distance": 69.0,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Cuddalore",
+   "to": "Nagapattinam",
+   "safety": 47.8,
+   "risk": 52.2,
+   "distance": 136.7,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Cuddalore",
+   "to": "Chidambaram",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 49.7,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Chidambaram",
+   "to": "Mayiladuthurai",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 41.8,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Mayiladuthurai",
+   "to": "Nagapattinam",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 53.3,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tiruchirappalli (Trichy)",
+   "to": "Pudukkottai",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 58.1,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Pudukkottai",
+   "to": "Sivaganga",
+   "safety": 54.3,
+   "risk": 45.7,
+   "distance": 86.8,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Sivaganga",
+   "to": "Madurai",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 50.7,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Tiruchirappalli (Trichy)",
+   "to": "Dindigul",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 116.8,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tiruchirappalli (Trichy)",
+   "to": "Perambalur",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 66.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Perambalur",
+   "to": "Kallakurichi",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 71.1,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Dindigul",
+   "to": "Madurai",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 64.2,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Dindigul",
+   "to": "Palani",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 62.6,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Palani",
+   "to": "Coimbatore",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 110.2,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Dindigul",
+   "to": "Karur",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 84.4,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Madurai",
+   "to": "Theni",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 88.8,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Madurai",
+   "to": "Virudhunagar",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 54.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Madurai",
+   "to": "Aruppukkottai",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 57.8,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Aruppukkottai",
+   "to": "Paramakudi",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 68.0,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Paramakudi",
+   "to": "Ramanathapuram",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 42.6,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Virudhunagar",
+   "to": "Rajapalayam",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 57.9,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Virudhunagar",
+   "to": "Sivakasi",
+   "safety": 89.4,
+   "risk": 10.6,
+   "distance": 28.0,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Virudhunagar",
+   "to": "Ramanathapuram",
+   "safety": 35.5,
+   "risk": 64.5,
+   "distance": 123.6,
+   "road_type": "Main Road",
+   "lighting": "Poor"
+  },
+  {
+   "from": "Madurai",
+   "to": "Tirunelveli",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 175.6,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tirunelveli",
+   "to": "Thoothukudi",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 52.4,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tirunelveli",
+   "to": "Nagercoil",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 86.6,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Chennai",
+   "to": "Villupuram",
+   "safety": 43.8,
+   "risk": 56.2,
+   "distance": 191.2,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Villupuram",
+   "to": "Cuddalore",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 47.1,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Villupuram",
+   "to": "Tiruchirappalli (Trichy)",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 192.0,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Chennai",
+   "to": "Pondicherry",
+   "safety": 43.8,
+   "risk": 56.2,
+   "distance": 173.9,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Villupuram",
+   "to": "Pondicherry",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 44.8,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Cuddalore",
+   "to": "Pondicherry",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 23.8,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  }
+ ]
+};
+
+// Any-time mode uses the highest modeled risk for each road across all periods.
+// This keeps a route usable without requiring the user to know an exact time.
+// The exported frontend network contains one modeled period, so use those edges
+// as the local fallback for every time selector unless period-specific data exists.
+NETWORK.byTime = NETWORK.byTime || {};
+const exportedEdges = NETWORK.edges || [];
+['Morning', 'Afternoon', 'Evening', 'Night'].forEach(period => {
+  if (!NETWORK.byTime[period]) NETWORK.byTime[period] = exportedEdges;
+});
+
+function buildAnyTimeNetwork() {
+  const periods = ['Morning', 'Afternoon', 'Evening', 'Night'];
+  const edgeMap = new Map();
+  periods.forEach(period => {
+    (NETWORK.byTime[period] || []).forEach(edge => {
+      const key = [edge.from, edge.to].sort().join('::');
+      const current = edgeMap.get(key);
+      if (!current || edge.risk > current.risk) edgeMap.set(key, { ...edge });
+    });
+  });
+  NETWORK.byTime['Any time'] = [...edgeMap.values()];
+}
+buildAnyTimeNetwork();
+
+// Leaflet is preferred, but the app must still show routes when the CDN or map
+// tiles are unavailable. This small SVG implementation covers the map methods
+// used below and keeps the route finder usable offline.
+function createOfflineLeaflet() {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const mapElement = document.getElementById('map');
+  mapElement.classList.add('offline-map');
+  mapElement.innerHTML = '';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 1000 700');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', 'SafeCommute offline route map');
+  mapElement.appendChild(svg);
+
+  let view = { minLat: 8, maxLat: 14, minLon: 76, maxLon: 81 };
+  const layers = new Set();
+  const make = (tag, attrs = {}) => {
+    const node = document.createElementNS(svgNS, tag);
+    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+    return node;
+  };
+  const project = ([lat, lon]) => {
+    const x = ((lon - view.minLon) / (view.maxLon - view.minLon)) * 930 + 35;
+    const y = ((view.maxLat - lat) / (view.maxLat - view.minLat)) * 630 + 35;
+    return [x, y];
+  };
+  const boundsFor = points => {
+    const lats = points.map(point => point[0]);
+    const lons = points.map(point => point[1]);
+    return { minLat: Math.min(...lats), maxLat: Math.max(...lats), minLon: Math.min(...lons), maxLon: Math.max(...lons), points };
+  };
+  const setViewBounds = bounds => {
+    const latSpan = Math.max(bounds.maxLat - bounds.minLat, 0.7);
+    const lonSpan = Math.max(bounds.maxLon - bounds.minLon, 0.7);
+    const latPad = latSpan * 0.16, lonPad = lonSpan * 0.16;
+    view = { minLat: bounds.minLat - latPad, maxLat: bounds.maxLat + latPad, minLon: bounds.minLon - lonPad, maxLon: bounds.maxLon + lonPad };
+  };
+  const render = () => {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.appendChild(make('rect', { x: 0, y: 0, width: 1000, height: 700, fill: '#dbeafe' }));
+    for (let lat = Math.ceil(view.minLat); lat <= view.maxLat; lat += 1) {
+      const [, y] = project([lat, view.minLon]);
+      svg.appendChild(make('line', { x1: 35, y1: y, x2: 965, y2: y, stroke: '#bfdbfe', 'stroke-width': 1 }));
+      const label = make('text', { x: 40, y: y - 4, fill: '#64748b', 'font-size': 11 });
+      label.textContent = `${lat}°N`;
+      svg.appendChild(label);
+    }
+    for (let lon = Math.ceil(view.minLon); lon <= view.maxLon; lon += 1) {
+      const [x] = project([view.minLat, lon]);
+      svg.appendChild(make('line', { x1: x, y1: 35, x2: x, y2: 665, stroke: '#bfdbfe', 'stroke-width': 1 }));
+      const label = make('text', { x: x + 3, y: 660, fill: '#64748b', 'font-size': 11 });
+      label.textContent = `${lon}°E`;
+      svg.appendChild(label);
+    }
+    const title = make('text', { x: 50, y: 24, fill: '#334155', 'font-size': 15, 'font-weight': '700' });
+    title.textContent = 'SafeCommute route map (offline view)';
+    svg.appendChild(title);
+    const note = make('text', { x: 960, y: 24, fill: '#475569', 'font-size': 11, 'text-anchor': 'end' });
+    note.textContent = 'Map tiles unavailable — route data is still shown';
+    svg.appendChild(note);
+    layers.forEach(layer => layer.draw(svg, project));
+  };
+  const map = {
+    setView(center, zoom = 7) {
+      const span = zoom >= 12 ? 0.35 : zoom >= 9 ? 1.4 : 6;
+      view = { minLat: center[0] - span, maxLat: center[0] + span, minLon: center[1] - span, maxLon: center[1] + span };
+      render();
+      return this;
+    },
+    addLayer(layer) { layers.add(layer); layer._map = this; render(); return this; },
+    removeLayer(layer) { layers.delete(layer); render(); return this; },
+    fitBounds(bounds) { if (bounds && bounds.points && bounds.points.length) setViewBounds(boundsFor(bounds.points)); render(); return this; },
+    _render: render
+  };
+  const layerBase = (draw, methods = {}) => ({ draw, ...methods, addTo(target) { target.addLayer(this); return this; } });
+  const api = {
+    map() { render(); return map; },
+    tileLayer() { return layerBase(() => {}); },
+    circleMarker(coords, options = {}) {
+      return layerBase((target, projectPoint) => {
+        const [x, y] = projectPoint(layer.coords);
+        target.appendChild(make('circle', { cx: x, cy: y, r: options.radius || 4, fill: options.fillColor || '#64748b', stroke: options.color || '#334155', 'stroke-width': 1, 'fill-opacity': options.fillOpacity || 0.8 }));
+      }, {
+        coords: [...coords],
+        bindTooltip() { return this; },
+        setLatLng(next) { this.coords = [...next]; if (this._map) this._map._render(); return this; },
+        getLatLng() { return { lat: this.coords[0], lng: this.coords[1] }; }
+      });
+    },
+    polyline(coords, options = {}) {
+      const layer = layerBase((target, projectPoint) => {
+        const points = coords.map(projectPoint).map(([x, y]) => `${x},${y}`).join(' ');
+        target.appendChild(make('polyline', { points, fill: 'none', stroke: options.color || '#2563eb', 'stroke-width': options.weight || 4, 'stroke-opacity': options.opacity || 1, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', ...(options.dashArray ? { 'stroke-dasharray': options.dashArray.replaceAll(',', ' ') } : {}) }));
+      }, { bindTooltip() { return this; }, getBounds() { return boundsFor(coords); } });
+      return layer;
+    },
+    divIcon(options) { return options; },
+    marker(coords, options = {}) {
+      const layer = layerBase((target, projectPoint) => {
+        const [x, y] = projectPoint(layer.coords);
+        const text = make('text', { x, y, 'font-size': 22, 'text-anchor': 'middle' });
+        text.textContent = '🚗';
+        target.appendChild(text);
+      }, {
+        coords: [...coords],
+        setLatLng(next) { this.coords = [...next]; if (this._map) this._map._render(); return this; },
+        getLatLng() { return { lat: this.coords[0], lng: this.coords[1] }; }
+      });
+      return layer;
+    }
+  };
+  render();
+  return api;
+}
+
+let map;
+try {
+  map = L.map('map').setView([10.9, 78.4], 7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors', maxZoom: 18
+  }).addTo(map);
+  const mapPlaceholder = document.getElementById('mapPlaceholder');
+  if (mapPlaceholder) mapPlaceholder.style.display = 'none';
+} catch (error) {
+  window.L = createOfflineLeaflet();
+  map = L.map('map').setView([10.9, 78.4], 7);
+  L.tileLayer('').addTo(map);
+}
+
+const cityNames = Object.keys(NETWORK.nodes).sort();
+const startSel = document.getElementById('startSel');
+const endSel = document.getElementById('endSel');
+const timeSel = document.getElementById('timeSel');
+const womenModeEl = document.getElementById('womenMode');
+const womenModeStateEl = document.getElementById('womenModeState');
+const useLocationBtn = document.getElementById('useLocationBtn');
+const locationStateEl = document.getElementById('locationState');
+const placeHintEl = document.getElementById('placeHint');
+let originLocation = null;
+let nearestOriginCity = null;
+let originMode = false;
+cityNames.forEach(name => {
+  startSel.add(new Option(name, name));
+  endSel.add(new Option(name, name));
+});
+startSel.value = "Tiruvannamalai";
+endSel.value = "Chennai";
+placeHintEl.textContent = `${cityNames.length} available places in the Tamil Nadu + Pondicherry route network. Open either list to choose a place.`;
+
+function distanceKm(a, b) {
+  const lat1 = Number(a.lat), lon1 = Number(a.lon);
+  const lat2 = Number(b.lat), lon2 = Number(b.lon);
+  const rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad;
+  const dLon = (lon2 - lon1) * rad;
+  const h = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLon / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+function nearestCity(lat, lon) {
+  return cityNames.reduce((nearest, name) => {
+    const candidate = NETWORK.nodes[name];
+    if (!nearest || distanceKm({ lat, lon }, candidate) < nearest.distance) {
+      return { name, distance: distanceKm({ lat, lon }, candidate) };
+    }
+    return nearest;
+  }, null);
+}
+
+function setLocationState(message, active = false) {
+  if (!locationStateEl) return;
+  locationStateEl.textContent = message;
+  locationStateEl.style.color = active ? '#86efac' : '#bfdbfe';
+}
+
+function setGpsOrigin(lat, lon, accuracy, source = 'device GPS') {
+  const nearest = nearestCity(lat, lon);
+  originLocation = { lat, lon, accuracy, source };
+  nearestOriginCity = nearest.name;
+  originMode = true;
+  startSel.value = nearestOriginCity;
+  locationCentered = false;
+  setLocationState(
+    `📍 ${source} active • ${lat.toFixed(5)}, ${lon.toFixed(5)} • routing from nearest town: ${nearest.name} (${nearest.distance.toFixed(1)} km away)`,
+    true
+  );
+  if (typeof renderUserLocation === 'function') renderUserLocation(lat, lon);
+}
+
+if (useLocationBtn) useLocationBtn.onclick = () => {
+  if (!navigator.geolocation) {
+    setLocationState('This device does not provide GPS. Choose a town manually.');
+    return;
+  }
+  useLocationBtn.disabled = true;
+  setLocationState('Requesting your current location…');
+  navigator.geolocation.getCurrentPosition(position => {
+    useLocationBtn.disabled = false;
+    setGpsOrigin(
+      position.coords.latitude,
+      position.coords.longitude,
+      position.coords.accuracy,
+      'device GPS'
+    );
+    if (endSel.value === nearestOriginCity) {
+      const alternative = [...endSel.options].find(option => option.value !== nearestOriginCity);
+      if (alternative) endSel.value = alternative.value;
+    }
+    document.getElementById('findBtn').click();
+  }, error => {
+    useLocationBtn.disabled = false;
+    setLocationState(`GPS location unavailable: ${error.message}. Use localhost/HTTPS and allow location access.`);
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 });
+};
+
+let cityMarkers = {};
+cityNames.forEach(name => {
+  const n = NETWORK.nodes[name];
+  cityMarkers[name] = L.circleMarker([n.lat, n.lon], { radius: 4, color: '#555', fillOpacity: 0.8 })
+    .addTo(map).bindTooltip(name);
+});
+
+// ---- Build adjacency for Dijkstra, per time-of-day ----
+function womenEdgeProfile(edge, timeOfDay) {
+  let womenRisk = edge.risk;
+  const reasons = [];
+  if (timeOfDay === 'Night') {
+    womenRisk *= 1.5;
+    reasons.push('night travel');
+  }
+  if (edge.lighting === 'Poor') {
+    womenRisk += 15;
+    reasons.push('poor lighting');
+  }
+  if (edge.road_type === 'Isolated Lane') {
+    womenRisk += 20;
+    reasons.push('isolated road');
+  }
+  womenRisk = Math.min(100, womenRisk);
+  return {
+    womenRisk: womenRisk,
+    womenSafety: Math.max(0, 100 - womenRisk),
+    womenReason: reasons.join(', ')
+  };
+}
+
+function buildGraph(timeOfDay) {
+  const adj = {};
+  cityNames.forEach(n => adj[n] = []);
+  NETWORK.byTime[timeOfDay].forEach(e => {
+    const profile = womenEdgeProfile(e, timeOfDay);
+    const edge = { to: e.to, risk: e.risk, distance: e.distance, safety: e.safety,
+      road_type: e.road_type, lighting: e.lighting, womenRisk: profile.womenRisk,
+      womenSafety: profile.womenSafety, womenReason: profile.womenReason };
+    const reverse = { ...edge, to: e.from };
+    adj[e.from].push(edge);
+    adj[e.to].push(reverse);
+  });
+  return adj;
+}
+
+// ---- Dijkstra ----
+function dijkstra(adj, start, end, weightKey) {
+  const dist = {}, prev = {}, visited = new Set();
+  cityNames.forEach(n => dist[n] = Infinity);
+  dist[start] = 0;
+  const pq = new Set(cityNames);
+  while (pq.size) {
+    let u = null, best = Infinity;
+    for (const n of pq) { if (dist[n] < best) { best = dist[n]; u = n; } }
+    if (u === null) break;
+    pq.delete(u); visited.add(u);
+    if (u === end) break;
+    for (const edge of adj[u]) {
+      if (visited.has(edge.to)) continue;
+      const alt = dist[u] + edge[weightKey];
+      if (alt < dist[edge.to]) { dist[edge.to] = alt; prev[edge.to] = { node: u, edge }; }
+    }
+  }
+  if (dist[end] === Infinity) return null;
+  const path = [end]; const edges = [];
+  let cur = end;
+  while (prev[cur]) { edges.unshift(prev[cur].edge); cur = prev[cur].node; path.unshift(cur); }
+  return { path, edges, total: dist[end] };
+}
+
+function scoreColor(s) { return s >= 70 ? '#4ade80' : s >= 45 ? '#fbbf24' : '#f87171'; }
+
+let drawnLayers = [];
+function clearLayers() { drawnLayers.forEach(l => map.removeLayer(l)); drawnLayers = []; }
+
+let lastResult = null;
+let routeInitialized = false;
+const API_BASE = window.SAFECOMMUTE_API || 'http://127.0.0.1:5000';
+let liveTripId = null;
+let liveWatchId = null;
+let liveSyncTimer = null;
+let lastPosition = null;
+const HIGH_RISK_ROUTE = 55;
+const LOW_SAFETY_SEGMENT = 45;
+const riskAlertKeys = new Set();
+const safetyAlertEl = document.getElementById('safetyAlert');
+const safetyAlertTitleEl = document.getElementById('safetyAlertTitle');
+const safetyAlertBodyEl = document.getElementById('safetyAlertBody');
+
+function renderSafetyAlert(summary) {
+  if (!summary || !lastResult) return;
+  const womenMode = lastResult.womenMode;
+  const routeRisk = summary.risk;
+  safetyAlertEl.style.display = 'block';
+  safetyAlertEl.className = 'safety-alert ' + (routeRisk >= HIGH_RISK_ROUTE ? 'danger' : routeRisk >= 30 ? '' : 'good');
+  if (routeRisk >= HIGH_RISK_ROUTE) {
+    safetyAlertTitleEl.textContent = '⚠ High-risk stretch detected';
+  } else if (routeRisk >= 30) {
+    safetyAlertTitleEl.textContent = '⚠ Safety caution for this route';
+  } else {
+    safetyAlertTitleEl.textContent = '✅ Lower-risk route selected';
+  }
+  const modeText = womenMode ? 'Women Safety Mode adds extra weight to night travel, poor lighting, and isolated roads.'
+    : 'Normal route scoring is active. Turn on Women Safety Mode for extra lighting and isolation penalties.';
+  const reasonText = summary.reasons.length ? ` Main factors: ${summary.reasons.join('; ')}.` : '';
+  const smsText = womenMode && routeRisk >= HIGH_RISK_ROUTE
+    ? ' If a trusted contact is saved, an SMS-only alert will be sent; no call will be placed.'
+    : '';
+  safetyAlertBodyEl.textContent = `${modeText} Estimated risk is ${routeRisk.toFixed(1)}%.${reasonText}${smsText} This is a decision-support estimate, not a guarantee of safety.`;
+}
+
+womenModeEl.addEventListener('change', () => {
+  womenModeStateEl.textContent = womenModeEl.checked ? 'ON' : 'OFF';
+  if (lastResult) document.getElementById('findBtn').click();
+});
+
+document.getElementById('findBtn').onclick = () => {
+  const shouldAutoNotify = routeInitialized;
+  const usingGpsOrigin = originMode && originLocation && nearestOriginCity;
+  const start = usingGpsOrigin ? nearestOriginCity : startSel.value;
+  const end = endSel.value, timeOfDay = timeSel.value;
+  const womenMode = womenModeEl.checked;
+  const errEl = document.getElementById('err');
+  errEl.style.display = 'none';
+  if (start === end) { errEl.textContent = "Pick two different cities."; errEl.style.display = 'block'; return; }
+
+  const adj = buildGraph(timeOfDay);
+  const safest = dijkstra(adj, start, end, womenMode ? 'womenRisk' : 'risk');
+  const shortest = dijkstra(adj, start, end, 'distance');
+  if (!safest) { errEl.textContent = "No route found in this network between those cities."; errEl.style.display = 'block'; return; }
+
+  clearLayers();
+  function summarize(r) {
+    const dist = r.edges.reduce((a,e) => a+e.distance, 0);
+    const activeSafety = e => womenMode ? e.womenSafety : e.safety;
+    const avgSafety = r.edges.reduce((a,e) => a+activeSafety(e), 0) / r.edges.length;
+    const minLeg = r.edges.reduce((m,e) => activeSafety(e) < activeSafety(m) ? e : m, r.edges[0]);
+    const reasons = [...new Set(r.edges.filter(e => e.womenReason).map(e => e.womenReason))];
+     const originDistance = usingGpsOrigin ? distanceKm(originLocation, NETWORK.nodes[start]) : 0;
+     return { path: r.path, edges: r.edges, dist: dist + originDistance, avgSafety: avgSafety,
+              risk: 100 - avgSafety, minLeg: minLeg, reasons: reasons,
+              originDistance: originDistance };
+  }
+  const safestSum = summarize(safest);
+  const shortestSum = shortest ? summarize(shortest) : null;
+  lastResult = {
+    safest: safestSum,
+    shortest: shortestSum,
+    timeOfDay,
+    womenMode,
+    start,
+    end,
+    originLocation: usingGpsOrigin ? { ...originLocation } : null
+  };
+  routeInitialized = true;
+
+  if (usingGpsOrigin) {
+    const anchor = NETWORK.nodes[start];
+    const originLine = L.polyline([[originLocation.lat, originLocation.lon], [anchor.lat, anchor.lon]], {
+      color: '#2563eb', weight: 4, opacity: 0.8, dashArray: '5,7'
+    }).addTo(map).bindTooltip(`Live location → ${start}`);
+    drawnLayers.push(originLine);
+  }
+
+  // Draw safest route, colored per-leg
+  safestSum.edges.forEach((e, i) => {
+    const a = NETWORK.nodes[safestSum.path[i]], b = NETWORK.nodes[safestSum.path[i+1]];
+    const activeSafety = womenMode ? e.womenSafety : e.safety;
+    const line = L.polyline([[a.lat,a.lon],[b.lat,b.lon]], { color: scoreColor(activeSafety), weight: 6, opacity: 0.9 })
+      .addTo(map).bindTooltip(`${safestSum.path[i]} → ${safestSum.path[i+1]}: safety ${activeSafety.toFixed(1)}`);
+    drawnLayers.push(line);
+  });
+  // Draw shortest as dashed red reference, if different
+  const sameRoute = shortestSum && JSON.stringify(shortestSum.path) === JSON.stringify(safestSum.path);
+  if (shortestSum && !sameRoute) {
+    const coords = shortestSum.path.map(n => [NETWORK.nodes[n].lat, NETWORK.nodes[n].lon]);
+    const line = L.polyline(coords, { color: '#f87171', weight: 3, opacity: 0.55, dashArray: '6,8' })
+      .addTo(map).bindTooltip('Shortest route (reference)');
+    drawnLayers.push(line);
+  }
+  const routeCoords = safestSum.path.map(n => [NETWORK.nodes[n].lat, NETWORK.nodes[n].lon]);
+  if (usingGpsOrigin) routeCoords.unshift([originLocation.lat, originLocation.lon]);
+  const bounds = L.polyline(routeCoords).getBounds();
+  map.fitBounds(bounds, { padding: [40,40] });
+
+  document.getElementById('resultCard').style.display = 'block';
+  document.getElementById('res-path').textContent = usingGpsOrigin
+    ? `📍 My location → ${safestSum.path.join(' → ')}`
+    : safestSum.path.join(' → ');
+  document.getElementById('res-dist').textContent = safestSum.dist.toFixed(1) + ' km';
+  document.getElementById('res-risk').textContent = safestSum.risk.toFixed(1) + '%';
+  document.getElementById('res-risk').className = 'value ' + (safestSum.risk < 30 ? 'safe' : safestSum.risk < 55 ? 'moderate' : 'risky');
+  document.getElementById('res-score').textContent = safestSum.avgSafety.toFixed(1) + ' / 100';
+  const weakestSafety = womenMode ? safestSum.minLeg.womenSafety : safestSum.minLeg.safety;
+  document.getElementById('res-weak').textContent = `${weakestSafety.toFixed(1)} (${safestSum.minLeg.road_type})`;
+  document.getElementById('res-reason').textContent = womenMode
+    ? (safestSum.reasons.length ? safestSum.reasons.join('; ') : 'avoids known risk factors')
+    : 'normal route scoring';
+
+  renderSafetyAlert(safestSum);
+
+  const compareCard = document.getElementById('compareCard');
+  if (!sameRoute && shortestSum) {
+    compareCard.style.display = 'block';
+    document.getElementById('res-short').textContent =
+      `${shortestSum.dist.toFixed(1)} km, risk ${shortestSum.risk.toFixed(1)}%`;
+  } else {
+    compareCard.style.display = 'none';
+  }
+
+  resetSimulation();
+  if (shouldAutoNotify && womenMode && safestSum.risk >= HIGH_RISK_ROUTE) {
+    triggerAutomaticRiskAlert({
+      key: `route:${start}:${end}:${timeOfDay}:${safestSum.risk.toFixed(1)}`,
+      risk: safestSum.risk,
+      reason: `${start} to ${end} is estimated as a high-risk route. ${safestSum.reasons.join('; ')}`,
+      location: fallbackLocation()
+    });
+  }
+};
+
+startSel.addEventListener('change', () => {
+  if (originMode && startSel.value !== nearestOriginCity) {
+    originMode = false;
+    originLocation = null;
+    nearestOriginCity = null;
+    setLocationState('Manual starting town selected. Use “Use My Current Location” to switch back to GPS.');
+  }
+});
+
+// Recalculate immediately when the user changes either place or the travel time.
+[startSel, endSel, timeSel].forEach(select => {
+  select.addEventListener('change', () => document.getElementById('findBtn').click());
+});
+
+// ---- Live simulation: animated marker + realtime DB feed ----
+let vehicle = null, running = false, segIndex = 0, t = 0, distCovered = 0;
+let lastAlertEdgeKey = null;
+const STEPS_PER_SEGMENT = 50;
+const feedEl = document.getElementById('feed');
+const incidentPool = [
+  { text: "Patrol check-in recorded", warn: false },
+  { text: "Traffic easing ahead", warn: false },
+  { text: "Low visibility reported on this stretch", warn: true },
+  { text: "Streetlight outage reported nearby", warn: true },
+  { text: "Road condition normal", warn: false },
+];
+let feedTimer = null;
+
+function pushIncident() {
+  const inc = incidentPool[Math.floor(Math.random()*incidentPool.length)];
+  const div = document.createElement('div');
+  div.className = 'item' + (inc.warn ? ' warn' : '');
+  div.textContent = `[${new Date().toLocaleTimeString()}] ${inc.text}`;
+  feedEl.prepend(div);
+  if (feedEl.children.length > 6) feedEl.removeChild(feedEl.lastChild);
+}
+
+let sosTimer = null;
+let sosSeconds = 5;
+let lastAlertMessage = '';
+const sosBtn = document.getElementById('sosBtn');
+const sosCountdownEl = document.getElementById('sosCountdown');
+const sosSecondsEl = document.getElementById('sosSeconds');
+const sosResultEl = document.getElementById('sosResult');
+const sosLocationEl = document.getElementById('sosLocation');
+const sosNameEl = document.getElementById('sosName');
+const safetyContactEl = document.getElementById('safetyContact');
+const locationMapLinkEl = document.getElementById('locationMapLink');
+const smsLinksEl = document.getElementById('smsLinks');
+const deliveryNoteEl = document.getElementById('deliveryNote');
+
+sosNameEl.value = localStorage.getItem('safecommute.sosName') || '';
+const savedSafetyContact = localStorage.getItem('safecommute.safetyContact')
+  || (localStorage.getItem('safecommute.sosContacts') || '').split(',')[0].trim();
+safetyContactEl.value = savedSafetyContact;
+sosNameEl.addEventListener('input', () => localStorage.setItem('safecommute.sosName', sosNameEl.value));
+safetyContactEl.addEventListener('input', () => {
+  localStorage.setItem('safecommute.safetyContact', safetyContactEl.value);
+  if (sosResultEl.style.display !== 'none') renderSmsLinks();
+});
+safetyContactEl.addEventListener('change', () => {
+  if (lastResult && lastResult.womenMode && lastResult.safest.risk >= HIGH_RISK_ROUTE) {
+    triggerAutomaticRiskAlert({
+      key: `route:${lastResult.start}:${lastResult.end}:${lastResult.timeOfDay}:${lastResult.safest.risk.toFixed(1)}`,
+      risk: lastResult.safest.risk,
+      reason: `${lastResult.start} to ${lastResult.end} is estimated as a high-risk route.`,
+      location: fallbackLocation()
+    });
+  }
+});
+
+function fallbackLocation() {
+  if (vehicle) {
+    const p = vehicle.getLatLng();
+    return { lat: p.lat, lon: p.lng, source: 'simulated live route position' };
+  }
+  if (originLocation) {
+    return { lat: originLocation.lat, lon: originLocation.lon, source: originLocation.source || 'device GPS' };
+  }
+  const city = lastResult ? lastResult.safest.path[0] : startSel.value;
+  const n = NETWORK.nodes[city];
+  return { lat: n.lat, lon: n.lon, source: `${city} route position` };
+}
+
+function safetyContact() {
+  return safetyContactEl.value.trim();
+}
+
+function smsHref(phone) {
+  return `sms:${phone}?body=${encodeURIComponent(lastAlertMessage)}`;
+}
+
+function renderSmsLinks() {
+  smsLinksEl.innerHTML = '';
+  const contact = safetyContact();
+  if (!contact) {
+    deliveryNoteEl.textContent = 'Add one trusted contact mobile number above, then use Open SMS alert.';
+    return;
+  }
+  deliveryNoteEl.textContent = 'Automatic alerts use SMS only. If backend delivery is unavailable, open the SMS app below.';
+  const link = document.createElement('a');
+  link.href = smsHref(contact);
+  link.textContent = `📩 Open SMS for ${contact}`;
+  link.setAttribute('aria-label', `Open SMS alert for ${contact}`);
+  smsLinksEl.appendChild(link);
+}
+
+function openSmsAlert() {
+  const contact = safetyContact();
+  if (!contact) {
+    deliveryNoteEl.textContent = 'Enter the trusted contact mobile number first.';
+    safetyContactEl.focus();
+    return;
+  }
+  window.location.href = smsHref(contact);
+}
+
+function showPreparedSmsAlert(location, message, title = '🚨 SMS safety alert ready') {
+  const mapsUrl = `https://www.google.com/maps?q=${location.lat.toFixed(6)},${location.lon.toFixed(6)}`;
+  lastAlertMessage = message;
+  sosLocationEl.textContent = `Location captured from ${location.source}: ${location.lat.toFixed(5)}, ${location.lon.toFixed(5)}. This alert uses SMS only.`;
+  locationMapLinkEl.href = mapsUrl;
+  renderSmsLinks();
+  sosResultEl.style.display = 'block';
+  sosBtn.disabled = false;
+  sosBtn.textContent = '📩 Send SMS Safety Alert Again';
+  safetyAlertEl.style.display = 'block';
+  safetyAlertEl.className = 'safety-alert danger';
+  safetyAlertTitleEl.textContent = title;
+  safetyAlertBodyEl.textContent = 'Your location is ready to share with the trusted contact by SMS. No call will be placed.';
+}
+
+async function sendSafetySmsBackend(location, message, alertType = 'risk', risk = null, reason = '') {
+  const contact = safetyContact();
+  if (!contact) {
+    deliveryNoteEl.textContent = 'Add the trusted contact mobile number to enable automatic SMS alerts.';
+    safetyContactEl.focus();
+    return;
+  }
+  try {
+    const response = await fetch(`${API_BASE}/api/risk-alert`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_name: sosNameEl.value.trim() || 'SafeCommute user',
+        lat: location.lat,
+        lon: location.lon,
+        timestamp: new Date().toISOString(),
+        safety_contact: contact,
+        message,
+        alert_type: alertType,
+        risk,
+        reason,
+        route: lastResult ? `${lastResult.start} to ${lastResult.end}` : 'the current route'
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'SMS alert request failed');
+    if (data.status === 'sent') {
+      deliveryNoteEl.textContent = `✅ SMS sent to ${data.sent_to.join(', ')}.`;
+    } else {
+      deliveryNoteEl.textContent = `ℹ ${data.delivery_note || 'Backend prepared the SMS alert.'} Use Open SMS alert below.`;
+    }
+  } catch (error) {
+    deliveryNoteEl.textContent = 'ℹ Backend is unavailable. Use Open SMS alert below to send this message from your phone.';
+  }
+}
+
+function finishSOS(location) {
+  const mapsUrl = `https://www.google.com/maps?q=${location.lat.toFixed(6)},${location.lon.toFixed(6)}`;
+  const name = sosNameEl.value.trim() || 'SafeCommute user';
+  const message = `EMERGENCY: ${name} needs help. Live location: ${mapsUrl}`;
+  showPreparedSmsAlert(location, message, '🚨 Manual SMS safety alert ready');
+  sendSafetySmsBackend(location, message, 'manual_safety', 100, 'Manual safety alert requested');
+}
+
+function triggerAutomaticRiskAlert({ key, risk, reason, location }) {
+  const contact = safetyContact();
+  const contactKey = `${key}:${contact}`;
+  if (!contact || riskAlertKeys.has(contactKey)) return;
+  riskAlertKeys.add(contactKey);
+  const alertLocation = location || fallbackLocation();
+  const mapsUrl = `https://www.google.com/maps?q=${alertLocation.lat.toFixed(6)},${alertLocation.lon.toFixed(6)}`;
+  const name = sosNameEl.value.trim() || 'SafeCommute user';
+  const message = `SafeCommute safety alert for ${name}: ${reason} Location: ${mapsUrl}`;
+  showPreparedSmsAlert(alertLocation, message, '🚨 Automatic SMS safety alert');
+  sendSafetySmsBackend(alertLocation, message, 'automatic_risk', risk, reason);
+}
+
+function startSOS() {
+  if (sosTimer) return;
+  if (!safetyContact()) {
+    sosResultEl.style.display = 'block';
+    deliveryNoteEl.textContent = 'Enter the trusted contact mobile number before sending an SMS alert.';
+    safetyContactEl.focus();
+    return;
+  }
+  sosResultEl.style.display = 'none';
+  sosCountdownEl.style.display = 'block';
+  sosSeconds = 5;
+  sosSecondsEl.textContent = sosSeconds;
+  sosBtn.disabled = true;
+  sosBtn.textContent = 'SMS countdown active…';
+  sosTimer = setInterval(() => {
+    sosSeconds -= 1;
+    sosSecondsEl.textContent = sosSeconds;
+    if (sosSeconds <= 0) {
+      clearInterval(sosTimer);
+      sosTimer = null;
+      sosCountdownEl.style.display = 'none';
+      const fallback = fallbackLocation();
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => finishSOS({ lat: position.coords.latitude, lon: position.coords.longitude, source: 'device GPS' }),
+          () => finishSOS(fallback),
+          { enableHighAccuracy: true, timeout: 5000, maximumAge: 10000 }
+        );
+      } else {
+        finishSOS(fallback);
+      }
+    }
+  }, 1000);
+}
+
+function cancelSOS() {
+  if (sosTimer) clearInterval(sosTimer);
+  sosTimer = null;
+  sosCountdownEl.style.display = 'none';
+  sosBtn.disabled = false;
+  sosBtn.textContent = '📩 Send SMS Safety Alert';
+}
+
+sosBtn.onclick = startSOS;
+document.getElementById('cancelSosBtn').onclick = cancelSOS;
+document.getElementById('sendSmsBtn').onclick = openSmsAlert;
+smsLinksEl.addEventListener('click', event => {
+  if (event.target.matches('a')) deliveryNoteEl.textContent = 'SMS app opened with the alert message and location link.';
+});
+document.getElementById('copyAlertBtn').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(lastAlertMessage);
+    document.getElementById('copyAlertBtn').textContent = 'Copied ✓';
+  } catch (_) {
+    document.getElementById('copyAlertBtn').textContent = 'Copy unavailable';
+  }
+};
+
+const startLiveBtn = document.getElementById('startLiveBtn');
+const stopLiveBtn = document.getElementById('stopLiveBtn');
+const liveStatusEl = document.getElementById('liveStatus');
+let userLocationMarker = null;
+let locationCentered = false;
+
+function showRealtimeAlerts(alerts, smsAlert = null) {
+  if (!alerts || !alerts.length) return;
+  safetyAlertEl.style.display = 'block';
+  safetyAlertEl.className = 'safety-alert danger';
+  safetyAlertTitleEl.textContent = '🚨 Realtime safety alert';
+  safetyAlertBodyEl.textContent = alerts.map(alert => alert.message).join(' ');
+  alerts.forEach(alert => {
+    const item = document.createElement('div');
+    item.className = 'item warn';
+    item.textContent = `[${new Date().toLocaleTimeString()}] ${alert.message}`;
+    feedEl.prepend(item);
+  });
+  if (smsAlert) {
+    if (smsAlert.message && lastPosition) {
+      lastAlertMessage = smsAlert.message;
+      const mapsUrl = `https://www.google.com/maps?q=${lastPosition.lat.toFixed(6)},${lastPosition.lon.toFixed(6)}`;
+      locationMapLinkEl.href = mapsUrl;
+      sosLocationEl.textContent = `Live location captured: ${lastPosition.lat.toFixed(5)}, ${lastPosition.lon.toFixed(5)}. This alert uses SMS only.`;
+      renderSmsLinks();
+    }
+    deliveryNoteEl.textContent = smsAlert.status === 'sent'
+      ? `✅ Automatic SMS sent to ${smsAlert.sent_to.join(', ')}.`
+      : `ℹ ${smsAlert.delivery_note || 'Automatic SMS alert prepared.'} Use Open SMS alert below.`;
+    sosResultEl.style.display = 'block';
+  }
+}
+
+function renderUserLocation(lat, lon) {
+  if (!userLocationMarker) {
+    userLocationMarker = L.circleMarker([lat, lon], {
+      radius: 9, color: '#1d4ed8', fillColor: '#2563eb', fillOpacity: 1
+    }).addTo(map).bindTooltip('Your device location');
+  } else {
+    userLocationMarker.setLatLng([lat, lon]);
+  }
+  if (!locationCentered) {
+    map.setView([lat, lon], 13);
+    locationCentered = true;
+  }
+}
+
+function updateDeviceLocation(position) {
+  const lat = position.coords.latitude;
+  const lon = position.coords.longitude;
+  lastPosition = {
+    lat,
+    lon,
+    timestamp: new Date().toISOString()
+  };
+  if (originMode) {
+    const nearest = nearestCity(lat, lon);
+    originLocation = { ...originLocation, lat, lon, accuracy: position.coords.accuracy };
+    nearestOriginCity = nearest.name;
+    startSel.value = nearestOriginCity;
+    setLocationState(
+      `📡 Live GPS • ${lat.toFixed(5)}, ${lon.toFixed(5)} • route anchor: ${nearest.name} (${nearest.distance.toFixed(1)} km away)`,
+      true
+    );
+  }
+  renderUserLocation(lat, lon);
+}
+
+async function sendLivePosition(position) {
+  updateDeviceLocation(position);
+  if (!liveTripId) {
+    liveStatusEl.textContent = `GPS active • ${lastPosition.lat.toFixed(5)}, ${lastPosition.lon.toFixed(5)} • backend not connected`;
+    return;
+  }
+  try {
+    const response = await fetch(`${API_BASE}/api/trips/${liveTripId}/position`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lastPosition)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Position update failed');
+    liveStatusEl.textContent = `Live GPS connected • ${data.position.timestamp} • ${data.deviation_km.toFixed(2)} km from planned route`;
+    showRealtimeAlerts(data.alerts, data.sms_alert);
+  } catch (error) {
+    liveStatusEl.textContent = `Tracking started, but the last position could not be sent: ${error.message}`;
+  }
+}
+
+async function pollLiveTrip() {
+  if (!liveTripId) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/trips/${liveTripId}`);
+    if (!response.ok) throw new Error('Trip expired or backend stopped');
+    const data = await response.json();
+    if (data.position) liveStatusEl.textContent = `Live GPS connected • last update ${data.position.timestamp}`;
+  } catch (error) {
+    liveStatusEl.textContent = `Realtime connection lost: ${error.message}`;
+  }
+}
+
+async function startRealtimeTracking() {
+  if (!lastResult || liveWatchId !== null) return;
+  if (!navigator.geolocation) {
+    liveStatusEl.textContent = 'This browser does not provide GPS. Open the app on a phone using HTTPS or localhost, then allow location access.';
+    return;
+  }
+  startLiveBtn.disabled = true;
+  stopLiveBtn.disabled = false;
+  locationCentered = false;
+  liveStatusEl.textContent = 'Requesting device location permission…';
+  liveWatchId = navigator.geolocation.watchPosition(sendLivePosition, error => {
+    liveStatusEl.textContent = `GPS permission/location error: ${error.message}. Use HTTPS or localhost and allow location access.`;
+  }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
+  try {
+    const response = await fetch(`${API_BASE}/api/trips`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        start: startSel.value,
+        end: endSel.value,
+        time_of_day: lastResult.timeOfDay,
+        women_mode: lastResult.womenMode,
+        user_name: sosNameEl.value.trim() || 'SafeCommute user',
+        safety_contact: safetyContact()
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Could not start trip');
+    liveTripId = data.trip_id;
+    liveSyncTimer = setInterval(pollLiveTrip, 5000);
+    liveStatusEl.textContent = `GPS tracking active • realtime trip ${liveTripId} is ready`;
+  } catch (error) {
+    liveStatusEl.textContent = `GPS tracking active on this device. Backend unavailable (${error.message}); location is still shown on the map.`;
+  }
+}
+
+function stopRealtimeTracking() {
+  if (liveWatchId !== null && navigator.geolocation) navigator.geolocation.clearWatch(liveWatchId);
+  if (liveSyncTimer) clearInterval(liveSyncTimer);
+  liveWatchId = null;
+  liveSyncTimer = null;
+  liveTripId = null;
+  locationCentered = false;
+  startLiveBtn.disabled = false;
+  stopLiveBtn.disabled = true;
+  liveStatusEl.textContent = 'Realtime tracking is off.';
+}
+
+startLiveBtn.onclick = startRealtimeTracking;
+stopLiveBtn.onclick = stopRealtimeTracking;
+
+function resetSimulation() {
+  if (liveTripId) stopRealtimeTracking();
+  running = false; segIndex = 0; t = 0; distCovered = 0;
+  lastAlertEdgeKey = null;
+  if (vehicle) { map.removeLayer(vehicle); vehicle = null; }
+  if (feedTimer) { clearInterval(feedTimer); feedTimer = null; }
+  feedEl.innerHTML = '';
+  document.getElementById('startSimBtn').disabled = false;
+  document.getElementById('startSimBtn').textContent = '▶ Start Live Simulation';
+  document.getElementById('status-badge').textContent = '● ROUTE FOUND';
+  document.getElementById('status-badge').className = 'safe';
+  if (lastResult) renderSafetyAlert(lastResult.safest);
+}
+
+function lerp(a,b,f) { return a + (b-a)*f; }
+
+function tick() {
+  if (!running || !lastResult) return;
+  const r = lastResult.safest;
+  if (segIndex >= r.edges.length) {
+    document.getElementById('status-badge').textContent = '✅ ARRIVED SAFELY';
+    document.getElementById('status-badge').className = 'safe';
+    running = false;
+    document.getElementById('startSimBtn').disabled = false;
+    document.getElementById('startSimBtn').textContent = '▶ Restart Simulation';
+    return;
+  }
+  const a = NETWORK.nodes[r.path[segIndex]], b = NETWORK.nodes[r.path[segIndex+1]];
+  const edge = r.edges[segIndex];
+  const frac = t / STEPS_PER_SEGMENT;
+  const lat = lerp(a.lat, b.lat, frac), lon = lerp(a.lon, b.lon, frac);
+  vehicle.setLatLng([lat, lon]);
+
+  const badge = document.getElementById('status-badge');
+  const activeSafety = lastResult.womenMode ? edge.womenSafety : edge.safety;
+  if (activeSafety < LOW_SAFETY_SEGMENT) {
+    badge.textContent = '⚠ CAUTION — LOW SAFETY SEGMENT'; badge.className = 'risky';
+    const alertKey = `${r.path[segIndex]}-${r.path[segIndex + 1]}`;
+    if (lastAlertEdgeKey !== alertKey) {
+      lastAlertEdgeKey = alertKey;
+      safetyAlertEl.style.display = 'block';
+      safetyAlertEl.className = 'safety-alert danger';
+      safetyAlertTitleEl.textContent = '🚨 Live safety alert';
+      safetyAlertBodyEl.textContent = `${r.path[segIndex]} → ${r.path[segIndex + 1]} is estimated at ${activeSafety.toFixed(1)} / 100 safety. ${edge.womenReason ? `Reason: ${edge.womenReason}. ` : ''}An SMS-only alert is prepared for the trusted contact.`;
+      const alertItem = document.createElement('div');
+      alertItem.className = 'item warn';
+      alertItem.textContent = `[${new Date().toLocaleTimeString()}] Safety alert: low-score segment ahead`;
+      feedEl.prepend(alertItem);
+      if (lastResult.womenMode) {
+        triggerAutomaticRiskAlert({
+          key: `segment:${alertKey}`,
+          risk: 100 - activeSafety,
+          reason: `${r.path[segIndex]} to ${r.path[segIndex + 1]} is a low-safety segment (${activeSafety.toFixed(1)}/100).`,
+          location: { lat, lon, source: 'live route simulation' }
+        });
+      }
+    }
+  }
+  else if (activeSafety < 70) { badge.textContent = '● ON ROUTE — MODERATE'; badge.className = 'moderate'; }
+  else { badge.textContent = '● ON ROUTE — SAFE'; badge.className = 'safe'; }
+
+  t++;
+  if (t > STEPS_PER_SEGMENT) { distCovered += edge.distance; segIndex++; t = 0; }
+  setTimeout(() => requestAnimationFrame(tick), 40);
+}
+
+document.getElementById('startSimBtn').onclick = () => {
+  if (!lastResult || running) return;
+  running = true;
+  const start = lastResult.safest.path[0];
+  const n = NETWORK.nodes[start];
+  const icon = L.divIcon({ className: '', html: '<div style="font-size:22px;">🚗</div>', iconSize:[22,22], iconAnchor:[11,11] });
+  vehicle = L.marker([n.lat, n.lon], { icon }).addTo(map);
+  document.getElementById('startSimBtn').disabled = true;
+  document.getElementById('startSimBtn').textContent = 'Simulation running…';
+  pushIncident();
+  feedTimer = setInterval(pushIncident, 3500);
+  tick();
+};
+document.getElementById('resetSimBtn').onclick = resetSimulation;
+
+// Auto-run once on load with the default selection
+document.getElementById('findBtn').click();
+</script>
+</body>
+</html>
+

@@ -1,0 +1,849 @@
+{
+ "time_of_day": "Evening",
+ "nodes": {
+  "Tiruvannamalai": {
+   "lat": 12.2253,
+   "lon": 79.0747
+  },
+  "Polur": {
+   "lat": 12.5117,
+   "lon": 79.1261
+  },
+  "Chengam": {
+   "lat": 12.3,
+   "lon": 78.8
+  },
+  "Arni": {
+   "lat": 12.6706,
+   "lon": 79.2845
+  },
+  "Chetpet": {
+   "lat": 12.4644,
+   "lon": 79.3475
+  },
+  "Vandavasi": {
+   "lat": 12.5,
+   "lon": 79.62
+  },
+  "Thandarampattu": {
+   "lat": 12.154,
+   "lon": 78.947
+  },
+  "Vettavalam": {
+   "lat": 12.1,
+   "lon": 79.25
+  },
+  "Jamunamarathur": {
+   "lat": 12.5973,
+   "lon": 78.8878
+  },
+  "Gingee": {
+   "lat": 12.252,
+   "lon": 79.417
+  },
+  "Tindivanam": {
+   "lat": 12.234,
+   "lon": 79.655
+  },
+  "Melmalayanur": {
+   "lat": 12.266,
+   "lon": 79.05
+  },
+  "Tirukkoyilur": {
+   "lat": 11.966,
+   "lon": 79.202
+  },
+  "Kallakurichi": {
+   "lat": 11.74,
+   "lon": 78.959
+  },
+  "Ulundurpet": {
+   "lat": 11.698,
+   "lon": 79.288
+  },
+  "Chidambaram": {
+   "lat": 11.399,
+   "lon": 79.691
+  },
+  "Mayiladuthurai": {
+   "lat": 11.101,
+   "lon": 79.652
+  },
+  "Perambalur": {
+   "lat": 11.234,
+   "lon": 78.88
+  },
+  "Palani": {
+   "lat": 10.45,
+   "lon": 77.52
+  },
+  "Aruppukkottai": {
+   "lat": 9.51,
+   "lon": 78.095
+  },
+  "Paramakudi": {
+   "lat": 9.547,
+   "lon": 78.59
+  },
+  "Chennai": {
+   "lat": 13.0827,
+   "lon": 80.2707
+  },
+  "Kanchipuram": {
+   "lat": 12.8342,
+   "lon": 79.7036
+  },
+  "Vellore": {
+   "lat": 12.9165,
+   "lon": 79.1325
+  },
+  "Krishnagiri": {
+   "lat": 12.5186,
+   "lon": 78.2137
+  },
+  "Hosur": {
+   "lat": 12.7409,
+   "lon": 77.8253
+  },
+  "Salem": {
+   "lat": 11.6643,
+   "lon": 78.146
+  },
+  "Namakkal": {
+   "lat": 11.2189,
+   "lon": 78.1677
+  },
+  "Erode": {
+   "lat": 11.341,
+   "lon": 77.7172
+  },
+  "Tiruppur": {
+   "lat": 11.1085,
+   "lon": 77.3411
+  },
+  "Coimbatore": {
+   "lat": 11.0168,
+   "lon": 76.9558
+  },
+  "Pollachi": {
+   "lat": 10.66,
+   "lon": 77.008
+  },
+  "Udhagamandalam (Ooty)": {
+   "lat": 11.4102,
+   "lon": 76.695
+  },
+  "Karur": {
+   "lat": 10.9601,
+   "lon": 78.0766
+  },
+  "Tiruchirappalli (Trichy)": {
+   "lat": 10.7905,
+   "lon": 78.7047
+  },
+  "Thanjavur": {
+   "lat": 10.787,
+   "lon": 79.1378
+  },
+  "Kumbakonam": {
+   "lat": 10.9601,
+   "lon": 79.3788
+  },
+  "Nagapattinam": {
+   "lat": 10.7672,
+   "lon": 79.8449
+  },
+  "Pudukkottai": {
+   "lat": 10.3833,
+   "lon": 78.8
+  },
+  "Sivaganga": {
+   "lat": 9.8433,
+   "lon": 78.4809
+  },
+  "Madurai": {
+   "lat": 9.9252,
+   "lon": 78.1198
+  },
+  "Dindigul": {
+   "lat": 10.3624,
+   "lon": 77.9695
+  },
+  "Theni": {
+   "lat": 10.0104,
+   "lon": 77.4768
+  },
+  "Virudhunagar": {
+   "lat": 9.568,
+   "lon": 77.9624
+  },
+  "Sivakasi": {
+   "lat": 9.4491,
+   "lon": 77.7972
+  },
+  "Rajapalayam": {
+   "lat": 9.452,
+   "lon": 77.557
+  },
+  "Ramanathapuram": {
+   "lat": 9.3639,
+   "lon": 78.8395
+  },
+  "Tirunelveli": {
+   "lat": 8.7139,
+   "lon": 77.7567
+  },
+  "Thoothukudi": {
+   "lat": 8.7642,
+   "lon": 78.1348
+  },
+  "Nagercoil": {
+   "lat": 8.179,
+   "lon": 77.4338
+  },
+  "Villupuram": {
+   "lat": 11.9401,
+   "lon": 79.4861
+  },
+  "Cuddalore": {
+   "lat": 11.748,
+   "lon": 79.7714
+  },
+  "Pondicherry": {
+   "lat": 11.9139,
+   "lon": 79.8145
+  }
+ },
+ "edges": [
+  {
+   "from": "Tiruvannamalai",
+   "to": "Polur",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 40.4,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Tiruvannamalai",
+   "to": "Chengam",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 38.7,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Tiruvannamalai",
+   "to": "Vettavalam",
+   "safety": 89.5,
+   "risk": 10.5,
+   "distance": 29.5,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tiruvannamalai",
+   "to": "Thandarampattu",
+   "safety": 86.4,
+   "risk": 13.6,
+   "distance": 20.0,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Tiruvannamalai",
+   "to": "Arni",
+   "safety": 55.7,
+   "risk": 44.3,
+   "distance": 68.1,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Polur",
+   "to": "Chengam",
+   "safety": 27.8,
+   "risk": 72.2,
+   "distance": 53.2,
+   "road_type": "Isolated Lane",
+   "lighting": "Poor"
+  },
+  {
+   "from": "Polur",
+   "to": "Jamunamarathur",
+   "safety": 22.7,
+   "risk": 77.3,
+   "distance": 34.4,
+   "road_type": "Isolated Lane",
+   "lighting": "Poor"
+  },
+  {
+   "from": "Polur",
+   "to": "Chetpet",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 30.8,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Arni",
+   "to": "Chetpet",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 29.9,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Arni",
+   "to": "Vandavasi",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 51.3,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Thandarampattu",
+   "to": "Vettavalam",
+   "safety": 47.6,
+   "risk": 52.4,
+   "distance": 41.9,
+   "road_type": "Residential",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Chengam",
+   "to": "Jamunamarathur",
+   "safety": 27.8,
+   "risk": 72.2,
+   "distance": 43.0,
+   "road_type": "Isolated Lane",
+   "lighting": "Poor"
+  },
+  {
+   "from": "Tiruvannamalai",
+   "to": "Villupuram",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 68.5,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Gingee",
+   "to": "Villupuram",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 44.4,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Gingee",
+   "to": "Tindivanam",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 32.4,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Gingee",
+   "to": "Melmalayanur",
+   "safety": 54.3,
+   "risk": 45.7,
+   "distance": 49.9,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Gingee",
+   "to": "Tirukkoyilur",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 49.3,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Tirukkoyilur",
+   "to": "Kallakurichi",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 45.6,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Kallakurichi",
+   "to": "Ulundurpet",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 45.2,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Ulundurpet",
+   "to": "Villupuram",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 43.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tindivanam",
+   "to": "Pondicherry",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 49.5,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Vandavasi",
+   "to": "Kanchipuram",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 47.8,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Arni",
+   "to": "Vellore",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 39.9,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Chennai",
+   "to": "Kanchipuram",
+   "safety": 43.8,
+   "risk": 56.2,
+   "distance": 84.2,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Kanchipuram",
+   "to": "Vellore",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 78.2,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Vellore",
+   "to": "Krishnagiri",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 136.3,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Krishnagiri",
+   "to": "Hosur",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 61.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Krishnagiri",
+   "to": "Salem",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 119.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Salem",
+   "to": "Namakkal",
+   "safety": 71.6,
+   "risk": 28.4,
+   "distance": 62.0,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Namakkal",
+   "to": "Karur",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 38.1,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Salem",
+   "to": "Erode",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 73.7,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Erode",
+   "to": "Tiruppur",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 60.6,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tiruppur",
+   "to": "Coimbatore",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 54.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Coimbatore",
+   "to": "Pollachi",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 50.1,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Coimbatore",
+   "to": "Udhagamandalam (Ooty)",
+   "safety": 21.7,
+   "risk": 78.3,
+   "distance": 65.2,
+   "road_type": "Isolated Lane",
+   "lighting": "Poor"
+  },
+  {
+   "from": "Karur",
+   "to": "Tiruchirappalli (Trichy)",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 88.9,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tiruchirappalli (Trichy)",
+   "to": "Thanjavur",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 59.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Thanjavur",
+   "to": "Kumbakonam",
+   "safety": 89.4,
+   "risk": 10.6,
+   "distance": 40.8,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Kumbakonam",
+   "to": "Nagapattinam",
+   "safety": 54.3,
+   "risk": 45.7,
+   "distance": 69.0,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Cuddalore",
+   "to": "Nagapattinam",
+   "safety": 47.8,
+   "risk": 52.2,
+   "distance": 136.7,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Cuddalore",
+   "to": "Chidambaram",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 49.7,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Chidambaram",
+   "to": "Mayiladuthurai",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 41.8,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Mayiladuthurai",
+   "to": "Nagapattinam",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 53.3,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tiruchirappalli (Trichy)",
+   "to": "Pudukkottai",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 58.1,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Pudukkottai",
+   "to": "Sivaganga",
+   "safety": 54.3,
+   "risk": 45.7,
+   "distance": 86.8,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Sivaganga",
+   "to": "Madurai",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 50.7,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Tiruchirappalli (Trichy)",
+   "to": "Dindigul",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 116.8,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tiruchirappalli (Trichy)",
+   "to": "Perambalur",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 66.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Perambalur",
+   "to": "Kallakurichi",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 71.1,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Dindigul",
+   "to": "Madurai",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 64.2,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Dindigul",
+   "to": "Palani",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 62.6,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Palani",
+   "to": "Coimbatore",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 110.2,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Dindigul",
+   "to": "Karur",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 84.4,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Madurai",
+   "to": "Theni",
+   "safety": 65.4,
+   "risk": 34.6,
+   "distance": 88.8,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Madurai",
+   "to": "Virudhunagar",
+   "safety": 88.4,
+   "risk": 11.6,
+   "distance": 54.1,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Madurai",
+   "to": "Aruppukkottai",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 57.8,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Aruppukkottai",
+   "to": "Paramakudi",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 68.0,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Paramakudi",
+   "to": "Ramanathapuram",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 42.6,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Virudhunagar",
+   "to": "Rajapalayam",
+   "safety": 54.5,
+   "risk": 45.5,
+   "distance": 57.9,
+   "road_type": "Main Road",
+   "lighting": "Moderate"
+  },
+  {
+   "from": "Virudhunagar",
+   "to": "Sivakasi",
+   "safety": 89.4,
+   "risk": 10.6,
+   "distance": 28.0,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Virudhunagar",
+   "to": "Ramanathapuram",
+   "safety": 35.5,
+   "risk": 64.5,
+   "distance": 123.6,
+   "road_type": "Main Road",
+   "lighting": "Poor"
+  },
+  {
+   "from": "Madurai",
+   "to": "Tirunelveli",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 175.6,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tirunelveli",
+   "to": "Thoothukudi",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 52.4,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Tirunelveli",
+   "to": "Nagercoil",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 86.6,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Chennai",
+   "to": "Villupuram",
+   "safety": 43.8,
+   "risk": 56.2,
+   "distance": 191.2,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Villupuram",
+   "to": "Cuddalore",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 47.1,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Villupuram",
+   "to": "Tiruchirappalli (Trichy)",
+   "safety": 72.8,
+   "risk": 27.2,
+   "distance": 192.0,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Chennai",
+   "to": "Pondicherry",
+   "safety": 43.8,
+   "risk": 56.2,
+   "distance": 173.9,
+   "road_type": "Highway",
+   "lighting": "Good"
+  },
+  {
+   "from": "Villupuram",
+   "to": "Pondicherry",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 44.8,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  },
+  {
+   "from": "Cuddalore",
+   "to": "Pondicherry",
+   "safety": 71.8,
+   "risk": 28.2,
+   "distance": 23.8,
+   "road_type": "Main Road",
+   "lighting": "Good"
+  }
+ ]
+}

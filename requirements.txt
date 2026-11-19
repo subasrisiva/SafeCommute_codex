@@ -1,0 +1,10 @@
+pandas
+numpy
+scikit-learn
+folium
+networkx
+joblib
+flask
+flask-cors
+# Optional SMS delivery when TWILIO_* environment variables are configured
+twilio
