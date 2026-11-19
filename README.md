@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SafeCommute (VSCode + Codex)
 
 The route network covers Tamil Nadu plus Pondicherry/Puducherry. Routes can be
@@ -44,3 +45,7 @@ number and includes a Google Maps location link. A browser cannot silently send 
 SMS by itself, so the user must press Send in the phone's SMS app. The app does not
 place calls. Location and route data are stored only in the backend process and expire
 when the trip reaches 24 hours or the server restarts.
+=======
+# SafeCommute_codex
+AI-Driven Route Safety Analyzer
+>>>>>>> b39ba30a5c9364f15592de8df636cd0dd264d13b
